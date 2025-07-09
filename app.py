@@ -1,21 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify, Response, abort
-from sqlalchemy import create_engine, text
+from supabase import create_client, Client
 import os
 
 app = Flask(__name__)
-DATABASE_URL = "sqlite:///database.db"
 
-# Crear la base si no existe
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-with engine.begin() as conn:
-    conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS vehiculos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            matricula TEXT NOT NULL,
-            nombre TEXT NOT NULL,
-            modelo TEXT NOT NULL
-        )
-    """))
+# Configura aquí tus datos de Supabase:
+SUPABASE_URL = "https://tu-proyecto.supabase.co"       # Pon tu URL Supabase
+SUPABASE_KEY = "tu_api_key_anon_publica"                # Pon tu API KEY Supabase
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 USUARIO = "admin"
 CONTRASEÑA = "admin123"
@@ -38,25 +31,17 @@ def login():
 def menu():
     return render_template('menu.html')
 
-from flask import request
-
 @app.route('/vehiculos')
 def vehiculos():
     q = request.args.get('q', '').strip()
-    with engine.connect() as conn:
-        if q:
-            sql = text("""
-                SELECT * FROM vehiculos 
-                WHERE matricula LIKE :q OR nombre LIKE :q OR modelo LIKE :q
-            """)
-            resultado = conn.execute(sql, {"q": f"%{q}%"})
-        else:
-            sql = text("SELECT * FROM vehiculos")
-            resultado = conn.execute(sql)
-        vehiculos = resultado.fetchall()
+    query = supabase.table('vehiculos').select('*')
+    if q:
+        query = query.or_(
+            f"matricula.ilike.%{q}%,nombre.ilike.%{q}%,modelo.ilike.%{q}%"
+        )
+    result = query.execute()
+    vehiculos = result.data
     return render_template('vehiculos.html', vehiculos=vehiculos)
-
-
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_vehicle():
@@ -64,11 +49,11 @@ def add_vehicle():
         matricula = request.form['matricula']
         nombre = request.form['nombre']
         modelo = request.form['modelo']
-        with engine.begin() as conn:
-            conn.execute(text("""
-                INSERT INTO vehiculos (matricula, nombre, modelo)
-                VALUES (:matricula, :nombre, :modelo)
-            """), {"matricula": matricula, "nombre": nombre, "modelo": modelo})
+        supabase.table('vehiculos').insert({
+            "matricula": matricula,
+            "nombre": nombre,
+            "modelo": modelo
+        }).execute()
         return redirect('/vehiculos')
     return render_template('add.html')
 
@@ -78,34 +63,32 @@ def edit_vehicle(id):
         matricula = request.form['matricula']
         nombre = request.form['nombre']
         modelo = request.form['modelo']
-        with engine.begin() as conn:
-            conn.execute(text("""
-                UPDATE vehiculos SET matricula=:matricula, nombre=:nombre, modelo=:modelo WHERE id=:id
-            """), {"matricula": matricula, "nombre": nombre, "modelo": modelo, "id": id})
+        supabase.table('vehiculos').update({
+            "matricula": matricula,
+            "nombre": nombre,
+            "modelo": modelo
+        }).eq('id', id).execute()
         return redirect('/vehiculos')
     else:
-        with engine.connect() as conn:
-            resultado = conn.execute(text("SELECT * FROM vehiculos WHERE id = :id"), {"id": id})
-            vehiculo = resultado.fetchone()
+        result = supabase.table('vehiculos').select('*').eq('id', id).single().execute()
+        vehiculo = result.data
         return render_template('edit.html', vehiculo=vehiculo)
 
 @app.route('/delete/<int:id>', methods=['GET', 'POST'])
 def delete_vehicle(id):
     if request.method == 'POST':
-        with engine.begin() as conn:
-            conn.execute(text("DELETE FROM vehiculos WHERE id = :id"), {"id": id})
+        supabase.table('vehiculos').delete().eq('id', id).execute()
         return redirect('/vehiculos')
     else:
-        with engine.connect() as conn:
-            resultado = conn.execute(text("SELECT * FROM vehiculos WHERE id = :id"), {"id": id})
-            vehiculo = resultado.fetchone()
+        result = supabase.table('vehiculos').select('*').eq('id', id).single().execute()
+        vehiculo = result.data
         return render_template('confirm_delete.html', vehiculo=vehiculo)
 
 @app.route('/exportar_db')
 def exportar_db():
-    return send_file('database.db', as_attachment=True)
-
-
+    # Con Supabase no hay un archivo local para descargar.
+    # Aquí podrías implementar exportar CSV si quieres.
+    return "Exportar base de datos no disponible con Supabase (implementa exportación CSV si quieres)."
 
 @app.route('/api/registrar_matricula', methods=['POST'])
 def registrar_matricula():
@@ -117,11 +100,11 @@ def registrar_matricula():
     if not matricula:
         return jsonify({'error': 'Falta matrícula'}), 400
 
-    with engine.begin() as conn:
-        conn.execute(text("""
-            INSERT INTO vehiculos (matricula, nombre, modelo)
-            VALUES (:matricula, :nombre, :modelo)
-        """), {"matricula": matricula, "nombre": nombre, "modelo": modelo})
+    supabase.table('vehiculos').insert({
+        "matricula": matricula,
+        "nombre": nombre,
+        "modelo": modelo
+    }).execute()
 
     return jsonify({'status': 'ok', 'mensaje': 'Vehículo registrado'}), 200
 
@@ -133,11 +116,8 @@ def download_backup():
     token = request.args.get('token')
     if token != API_KEY:
         abort(403)  # Prohibido si no coincide el token
-    try:
-        return send_file('database.db', as_attachment=True)
-    except Exception:
-        abort(404)
-
+    # No hay archivo backup local, tendrías que implementar exportación o backup externo
+    return "Backup no disponible. Implementa exportación en Supabase."
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
