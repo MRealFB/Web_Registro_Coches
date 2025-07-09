@@ -84,11 +84,35 @@ def delete_vehicle(id):
         vehiculo = result.data
         return render_template('confirm_delete.html', vehiculo=vehiculo)
 
+import csv
+from io import StringIO
+from flask import Response
+
 @app.route('/exportar_db')
 def exportar_db():
-    # Con Supabase no hay un archivo local para descargar.
-    # Aquí podrías implementar exportar CSV si quieres.
-    return "Exportar base de datos no disponible con Supabase (implementa exportación CSV si quieres)."
+    # Traemos todos los vehículos de Supabase
+    result = supabase.table('vehiculos').select('*').execute()
+    vehiculos = result.data
+
+    # Creamos un CSV en memoria
+    si = StringIO()
+    cw = csv.writer(si)
+    # Cabecera del CSV
+    cw.writerow(['ID', 'Matrícula', 'Nombre', 'Modelo'])
+    # Filas con los datos
+    for v in vehiculos:
+        cw.writerow([v['id'], v['matricula'], v['nombre'], v['modelo']])
+
+    output = si.getvalue()
+    si.close()
+
+    # Devolvemos el CSV como respuesta con el tipo y nombre para descarga
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment;filename=vehiculos.csv'}
+    )
+
 
 @app.route('/api/registrar_matricula', methods=['POST'])
 def registrar_matricula():
