@@ -132,6 +132,37 @@ def registrar_matricula():
 
     return jsonify({'status': 'ok', 'mensaje': 'Vehículo registrado'}), 200
 
+from io import BytesIO
+from openpyxl import Workbook
+from flask import send_file
+
+@app.route('/exportar_excel')
+def exportar_excel():
+    result = supabase.table('vehiculos').select('*').execute()
+    vehiculos = result.data
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Vehículos"
+
+    # Cabecera
+    ws.append(['ID', 'Matrícula', 'Nombre', 'Modelo'])
+
+    # Filas
+    for v in vehiculos:
+        ws.append([v['id'], v['matricula'], v['nombre'], v['modelo']])
+
+    # Guardamos el archivo en memoria
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return send_file(output,
+                     as_attachment=True,
+                     download_name="vehiculos.xlsx",
+                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+
 
 API_KEY = "TuTokenSuperSecreto123"  # Cambia por algo seguro
 
