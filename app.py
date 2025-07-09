@@ -50,7 +50,7 @@ def vehiculos():
             (Vehiculo.modelo.ilike(f'%{q}%'))
         ).all()
     else:
-        vehiculos = vehiculos.query.all()
+        vehiculos = Vehiculo.query.all()
     return render_template('vehiculos.html', vehiculos=vehiculos)
 
 
