@@ -32,12 +32,14 @@ def enviar_email(contenido_csv):
     msg['To'] = EMAIL_DESTINO
     msg.set_content('Adjunto tienes el backup CSV de la base de datos.')
 
-    msg.add_attachment(contenido_csv, maintype='text', subtype='csv', filename='vehiculos_backup.csv')
+    # Aquí convertimos el contenido CSV (texto) a bytes y especificamos el tipo mime
+    msg.add_attachment(contenido_csv.encode('utf-8'), maintype='text', subtype='csv', filename='vehiculos_backup.csv')
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         smtp.send_message(msg)
     print("Backup enviado por email correctamente.")
+
 
 if __name__ == "__main__":
     csv_data = generar_csv()
