@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file, jsonift
 from sqlalchemy import create_engine, text
 import os
 
@@ -104,6 +104,27 @@ def delete_vehicle(id):
 @app.route('/exportar_db')
 def exportar_db():
     return send_file('database.db', as_attachment=True)
+
+from flask import jsonify
+
+@app.route('/api/registrar_matricula', methods=['POST'])
+def registrar_matricula():
+    data = request.get_json()
+    matricula = data.get('matricula')
+    nombre = data.get('nombre', 'Desconocido')
+    modelo = data.get('modelo', 'Desconocido')
+
+    if not matricula:
+        return jsonify({'error': 'Falta matrícula'}), 400
+
+    with engine.begin() as conn:
+        conn.execute(text("""
+            INSERT INTO vehiculos (matricula, nombre, modelo)
+            VALUES (:matricula, :nombre, :modelo)
+        """), {"matricula": matricula, "nombre": nombre, "modelo": modelo})
+
+    return jsonify({'status': 'ok', 'mensaje': 'Vehículo registrado'}), 200
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
