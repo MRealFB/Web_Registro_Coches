@@ -19,6 +19,7 @@ jobs:
       with:
         python-version: '3.x'
 
+    
     - name: Ejecutar script para enviar correo
       env:
         EMAIL_EMISOR: ${{ secrets.EMAIL_EMISOR }}
