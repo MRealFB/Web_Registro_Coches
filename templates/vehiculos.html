@@ -1,0 +1,10 @@
+<h1>Vehículos</h1>
+<table border="1">
+<tr><th>Matrícula</th><th>Nombre</th><th>Modelo</th><th>Acciones</th></tr>
+{% for v in vehiculos %}
+<tr>
+<td>{{ v.matricula }}</td><td>{{ v.nombre }}</td><td>{{ v.modelo }}</td>
+<td><a href="/edit/{{ v.id }}">Editar</a> | <a href="/delete/{{ v.id }}">Eliminar</a></td>
+</tr>
+{% endfor %}
+</table><br><a href="/menu">Volver</a>
