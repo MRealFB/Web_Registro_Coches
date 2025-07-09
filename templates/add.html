@@ -1,8 +1,12 @@
 <link rel="stylesheet" href="/static/style.css">
-<h1>Añadir Vehículo</h1>
-<form method="POST">
-Matrícula: <input name="matricula"><br>
-Nombre: <input name="nombre"><br>
-Modelo: <input name="modelo"><br>
-<input type="submit" value="Añadir">
-</form><a href="/menu">Volver</a>
+
+<div class="container">
+  <h1>➕ Añadir Vehículo</h1>
+  <form method="POST">
+    Matrícula: <input name="matricula" required><br>
+    Nombre: <input name="nombre" required><br>
+    Modelo: <input name="modelo" required><br>
+    <input type="submit" value="Añadir">
+  </form>
+  <a href="/menu">🔙 Volver</a>
+</div>
