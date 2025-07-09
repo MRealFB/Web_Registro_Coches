@@ -42,16 +42,20 @@ from flask import request
 
 @app.route('/vehiculos')
 def vehiculos():
-    q = request.args.get('q', '').strip()  # capturamos el parámetro de búsqueda
-    if q:
-        vehiculos = Vehiculo.query.filter(
-            (Vehiculo.matricula.ilike(f'%{q}%')) |
-            (Vehiculo.nombre.ilike(f'%{q}%')) |
-            (Vehiculo.modelo.ilike(f'%{q}%'))
-        ).all()
-    else:
-        vehiculos = Vehiculo.query.all()
+    q = request.args.get('q', '').strip()
+    with engine.connect() as conn:
+        if q:
+            sql = text("""
+                SELECT * FROM vehiculos 
+                WHERE matricula LIKE :q OR nombre LIKE :q OR modelo LIKE :q
+            """)
+            resultado = conn.execute(sql, {"q": f"%{q}%"})
+        else:
+            sql = text("SELECT * FROM vehiculos")
+            resultado = conn.execute(sql)
+        vehiculos = resultado.fetchall()
     return render_template('vehiculos.html', vehiculos=vehiculos)
+
 
 
 @app.route('/add', methods=['GET', 'POST'])
