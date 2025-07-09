@@ -11,7 +11,7 @@ DATABASE_URL = "sqlite:///database.db"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
-@app.before_first_request
+@app.before_request
 def create_tables():
     with engine.connect() as conn:
         conn.execute(text('''
