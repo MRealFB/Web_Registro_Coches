@@ -38,12 +38,21 @@ def login():
 def menu():
     return render_template('menu.html')
 
+from flask import request
+
 @app.route('/vehiculos')
-def ver_vehiculos():
-    with engine.connect() as conn:
-        resultado = conn.execute(text("SELECT * FROM vehiculos"))
-        vehiculos = resultado.fetchall()
+def vehiculos():
+    q = request.args.get('q', '').strip()  # capturamos el parámetro de búsqueda
+    if q:
+        vehiculos = Vehiculo.query.filter(
+            (Vehiculo.matricula.ilike(f'%{q}%')) |
+            (Vehiculo.nombre.ilike(f'%{q}%')) |
+            (Vehiculo.modelo.ilike(f'%{q}%'))
+        ).all()
+    else:
+        vehiculos = Vehiculo.query.all()
     return render_template('vehiculos.html', vehiculos=vehiculos)
+
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_vehicle():
