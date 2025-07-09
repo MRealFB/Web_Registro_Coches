@@ -1,15 +1,15 @@
+import os
 import csv
 import smtplib
 from io import StringIO
 from email.message import EmailMessage
 from supabase import create_client
 
-SUPABASE_URL = "https://gapfbzmccgkoatleopgv.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhcGZiem1jY2drb2F0bGVvcGd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwNzY2NzgsImV4cCI6MjA2NzY1MjY3OH0.fu-r_oHiGadA3f4WCO0UtOF3M59Kc1ZagtWB9SaJ7Bc"
-
-EMAIL_ADDRESS = "basedatosvehiculos@gmail.com"
-EMAIL_PASSWORD = "oxnt unyc embu fove"
-EMAIL_DESTINO = "basedatosvehiculos@gmail.com"
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+EMAIL_DESTINO = os.getenv("EMAIL_DESTINO")
 
 def generar_csv():
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
