@@ -2,6 +2,11 @@
 
 <div class="container">
   <h1>🚙 Vehículos</h1>
+  <form method="GET" action="/vehiculos" style="text-align:center; margin-bottom:15px;">
+  <input type="text" name="q" placeholder="Buscar matrícula, nombre o modelo" value="{{ request.args.get('q', '') }}" style="padding:8px; width: 80%; max-width:400px;">
+  <button type="submit">🔍 Buscar</button>
+</form>
+
   <table>
     <tr><th>Matrícula</th><th>Nombre</th><th>Modelo</th><th>Acciones</th></tr>
     {% for v in vehiculos %}
