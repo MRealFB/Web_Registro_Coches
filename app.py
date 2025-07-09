@@ -5,8 +5,8 @@ import os
 app = Flask(__name__)
 
 # Configura aquí tus datos de Supabase:
-SUPABASE_URL = "https://tu-proyecto.supabase.co"       # Pon tu URL Supabase
-SUPABASE_KEY = "tu_api_key_anon_publica"                # Pon tu API KEY Supabase
+SUPABASE_URL = "https://gapfbzmccgkoatleopgv.supabase.co"       # Pon tu URL Supabase
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhcGZiem1jY2drb2F0bGVvcGd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwNzY2NzgsImV4cCI6MjA2NzY1MjY3OH0.fu-r_oHiGadA3f4WCO0UtOF3M59Kc1ZagtWB9SaJ7Bc"                # Pon tu API KEY Supabase
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
