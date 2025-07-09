@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lista de vehículos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script>
+    function confirmarEliminar(id) {
+      if (confirm("¿Estás seguro de que quieres eliminar este vehículo?")) {
+        document.getElementById('form-delete-' + id).submit();
+      }
+    }
+  </script>
+</head>
+<body class="bg-light">
+  <div class="container mt-4">
+    <h2>Vehículos</h2>
+
+    <form class="d-flex mb-3" method="GET" action="{{ url_for('vehiculos') }}">
+      <input class="form-control me-2" type="search" placeholder="Buscar..." name="search" value="{{ search }}">
+      <button class="btn btn-outline-primary" type="submit">Buscar</button>
+      <a href="{{ url_for('vehiculos') }}" class="btn btn-outline-secondary ms-2">Limpiar</a>
+    </form>
+
+    <a href="{{ url_for('add') }}" class="btn btn-success mb-3">➕ Añadir vehículo</a>
+    <a href="{{ url_for('home') }}" class="btn btn-secondary mb-3 ms-2">⬅️ Volver al panel</a>
+
+    {% if vehiculos %}
+      <table class="table table-striped table-bordered align-middle">
+        <thead>
+          <tr>
+            <th>Matrícula</th>
+            <th>Nombre</th>
+            <th>Modelo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in vehiculos %}
+            <tr>
+              <td>{{ v.matricula }}</td>
+              <td>{{ v.nombre }}</td>
+              <td>{{ v.modelo }}</td>
+              <td>
+                <a href="{{ url_for('edit', id=v.id) }}" class="btn btn-sm btn-primary">✏️ Editar</a>
+
+                <form id="form-delete-{{ v.id }}" action="{{ url_for('delete', id=v.id) }}" method="POST" style="display:inline;">
+                  <button type="button" class="btn btn-sm btn-danger" onclick="confirmarEliminar({{ v.id }})">🗑️ Borrar</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No hay vehículos registrados.</p>
+    {% endif %}
+
+  </div>
+</body>
+</html>
