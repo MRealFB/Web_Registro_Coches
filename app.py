@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file, jsonift
+from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify, Response, abort
 from sqlalchemy import create_engine, text
 import os
 
@@ -105,7 +105,7 @@ def delete_vehicle(id):
 def exportar_db():
     return send_file('database.db', as_attachment=True)
 
-from flask import jsonify
+
 
 @app.route('/api/registrar_matricula', methods=['POST'])
 def registrar_matricula():
@@ -124,6 +124,19 @@ def registrar_matricula():
         """), {"matricula": matricula, "nombre": nombre, "modelo": modelo})
 
     return jsonify({'status': 'ok', 'mensaje': 'Vehículo registrado'}), 200
+
+
+API_KEY = "TuTokenSuperSecreto123"  # Cambia por algo seguro
+
+@app.route('/download_backup')
+def download_backup():
+    token = request.args.get('token')
+    if token != API_KEY:
+        abort(403)  # Prohibido si no coincide el token
+    try:
+        return send_file('database.db', as_attachment=True)
+    except Exception:
+        abort(404)
 
 
 if __name__ == '__main__':
